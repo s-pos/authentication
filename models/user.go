@@ -12,6 +12,16 @@ type User struct {
 	phoneVerificationAt *time.Time `db:"phone_verification_at"`
 	createdAt           time.Time  `db:"created_at"`
 	updatedAt           time.Time  `db:"updated_at"`
+
+	fcmToken string `db:"-"`
+}
+
+func (u *User) FcmToken() string {
+	return u.fcmToken
+}
+
+func (u *User) SetFcmToken(fcmToken string) {
+	u.fcmToken = fcmToken
 }
 
 func NewUser() *User {
