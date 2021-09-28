@@ -8,7 +8,7 @@ import (
 
 func (r *repo) InsertFcmToken(user *models.User) (*models.FcmToken, error) {
 	var (
-		fcmToken = models.NewFcmToken()
+		fcmToken models.FcmToken
 		now      = time.Now().In(r.location)
 		tx       = r.db.MustBegin()
 		err      error
@@ -30,5 +30,5 @@ func (r *repo) InsertFcmToken(user *models.User) (*models.FcmToken, error) {
 	}
 
 	err = tx.Commit()
-	return fcmToken, err
+	return &fcmToken, err
 }

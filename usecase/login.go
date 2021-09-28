@@ -43,15 +43,6 @@ func (u *usecase) Login(ctx context.Context, req models.RequestLogin) response.O
 
 	user.SetFcmToken(req.FcmToken)
 	user.SetDeviceId(req.DeviceID)
-	accessToken, expIn, err := u.repository.SetAccessToken(ctx, user)
-	if err != nil {
-		var code = string(constant.ErrorRedisSet)
-		if errors.Is(err, errors.New(string(constant.ErrorMarshal))) {
-			code = string(constant.ErrorMarshal)
-		}
-
-		return response.Errors(ctx, http.StatusInternalServerError, code, constant.Message[constant.LoginFailed], constant.ErrorGlobal, err)
-	}
 
 	wg.Add(1)
 	go func() {
@@ -64,14 +55,30 @@ func (u *usecase) Login(ctx context.Context, req models.RequestLogin) response.O
 			}
 		}
 	}()
+	wg.Wait()
+
+	select {
+	case err := <-errChan:
+		close(errChan)
+		return response.Errors(ctx, http.StatusInternalServerError, string(constant.ErrorQueryInsert), constant.Message[constant.LoginFailed], constant.ErrorGlobal, err)
+	default:
+	}
+
+	accessToken, expIn, err := u.repository.SetAccessToken(ctx, user)
+	if err != nil {
+		var code = string(constant.ErrorRedisSet)
+		if errors.Is(err, errors.New(string(constant.ErrorMarshal))) {
+			code = string(constant.ErrorMarshal)
+		}
+
+		return response.Errors(ctx, http.StatusInternalServerError, code, constant.Message[constant.LoginFailed], constant.ErrorGlobal, err)
+	}
 
 	loginView := view.LoginView{
 		AccessToken: accessToken,
 		TokenType:   constant.BearerToken,
 		ExpiresIn:   expIn,
 	}
-	wg.Wait()
-	close(errChan)
 
 	return response.Success(ctx, http.StatusOK, string(constant.LoginSuccess), constant.Message[constant.LoginSuccess], loginView)
 }

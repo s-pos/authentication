@@ -25,8 +25,8 @@ func (u *User) SetDeviceId(deviceId string) {
 	u.DeviceId = &deviceId
 }
 
-func (u *User) GetFcmToken() *string {
-	return u.FcmToken
+func (u *User) GetFcmToken() string {
+	return *u.FcmToken
 }
 
 func (u *User) SetFcmToken(fcmToken string) {
