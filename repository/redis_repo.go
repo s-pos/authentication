@@ -22,11 +22,11 @@ func (r *repo) SetAccessToken(ctx context.Context, user *models.User) (string, i
 	)
 	key = strings.ReplaceAll(key, "-", "")
 	data := map[string]interface{}{
-		"id":           user.Id(),
-		"name":         user.Name(),
-		"email":        user.Email(),
-		"phone_number": user.Phone(),
-		"fcm_token":    user.FcmToken(),
+		"id":           user.GetId(),
+		"name":         user.GetName(),
+		"email":        user.GetEmail(),
+		"phone_number": user.GetPhone(),
+		"fcm_token":    user.GetFcmToken(),
 	}
 	dataByte, err := json.Marshal(data)
 	if err != nil {

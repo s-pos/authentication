@@ -26,6 +26,9 @@ type Repository interface {
 	// InsertNewUser query for create a.k.a register new user
 	InsertNewUser(user *models.User) (*models.User, error)
 
+	// InsertFcmToken will add new token after user success login
+	InsertFcmToken(user *models.User) (*models.FcmToken, error)
+
 	// SetAccessToken for login section.
 	// this function will be set access token and will store to redis
 	// with key uuid string and value user data + fcm

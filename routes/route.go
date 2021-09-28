@@ -27,7 +27,7 @@ func NewRouter(mdl middleware.Clients, ctrl controllers.Controller) Route {
 func (r *route) Router() *echo.Echo {
 	router := echo.New()
 	// base path
-	auth := router.Group("", echo.WrapMiddleware(r.middleware.APIKey))
+	auth := router.Group("", echo.WrapMiddleware(r.middleware.Logger), echo.WrapMiddleware(r.middleware.APIKey))
 	auth.POST("/login", r.controller.LoginHandler)
 
 	return router
