@@ -3,85 +3,108 @@ package models
 import "time"
 
 type User struct {
-	id                  int        `db:"id"`
-	name                string     `db:"name"`
-	email               string     `db:"email"`
-	password            string     `db:"password"`
-	phone               string     `db:"phone"`
-	emailVerificationAt *time.Time `db:"email_verification_at"`
-	phoneVerificationAt *time.Time `db:"phone_verification_at"`
-	createdAt           time.Time  `db:"created_at"`
-	updatedAt           time.Time  `db:"updated_at"`
+	ID                  int        `db:"id"`
+	Name                string     `db:"name"`
+	Email               string     `db:"email"`
+	Password            string     `db:"password"`
+	Phone               string     `db:"phone_number"`
+	EmailVerificationAt *time.Time `db:"email_verification_at"`
+	PhoneVerificationAt *time.Time `db:"phone_verification_at"`
+	CreatedAt           time.Time  `db:"created_at"`
+	UpdatedAt           time.Time  `db:"updated_at"`
+
+	FcmToken *string `db:"-"`
+	DeviceId *string `db:"-"`
+}
+
+func (u *User) GetDeviceId() *string {
+	return u.DeviceId
+}
+
+func (u *User) SetDeviceId(deviceId string) {
+	u.DeviceId = &deviceId
+}
+
+func (u *User) GetFcmToken() string {
+	return *u.FcmToken
+}
+
+func (u *User) SetFcmToken(fcmToken string) {
+	u.FcmToken = &fcmToken
 }
 
 func NewUser() *User {
 	return &User{}
 }
 
-func (u *User) Id() int {
-	return u.id
+func (u *User) GetId() int {
+	return u.ID
 }
 
-func (u *User) Name() string {
-	return u.name
+func (u *User) GetName() string {
+	return u.Name
 }
 
 func (u *User) SetName(name string) {
-	u.name = name
+	u.Name = name
 }
 
-func (u *User) Email() string {
-	return u.email
+func (u *User) GetEmail() string {
+	return u.Email
 }
 
 func (u *User) SetEmail(email string) {
-	u.email = email
+	u.Email = email
 }
 
-func (u *User) Password() string {
-	return u.password
+func (u *User) GetPassword() string {
+	return u.Password
 }
 
 func (u *User) SetPassword(password string) {
-	u.password = password
+	u.Password = password
 }
 
-func (u *User) Phone() string {
-	return u.phone
+func (u *User) GetPhone() string {
+	return u.Phone
 }
 
 func (u *User) SetPhone(phone string) {
-	u.phone = phone
+	u.Phone = phone
 }
 
-func (u *User) EmailVerificationAt() *time.Time {
-	return u.emailVerificationAt
+func (u *User) GetEmailVerificationAt() *time.Time {
+	return u.EmailVerificationAt
 }
 
 func (u *User) SetEmailVerificationAt(emailVerificationAt *time.Time) {
-	u.emailVerificationAt = emailVerificationAt
+	u.EmailVerificationAt = emailVerificationAt
 }
 
-func (u *User) PhoneVerificationAt() *time.Time {
-	return u.phoneVerificationAt
+func (u *User) IsEmailVerified() bool {
+	return u.GetEmailVerificationAt() != nil
+}
+
+func (u *User) GetPhoneVerificationAt() *time.Time {
+	return u.PhoneVerificationAt
 }
 
 func (u *User) SetPhoneVerificationAt(phoneVerificationAt *time.Time) {
-	u.phoneVerificationAt = phoneVerificationAt
+	u.PhoneVerificationAt = phoneVerificationAt
 }
 
-func (u *User) CreatedAt() time.Time {
-	return u.createdAt
+func (u *User) GetCreatedAt() time.Time {
+	return u.CreatedAt
 }
 
 func (u *User) SetCreatedAt(createdAt time.Time) {
-	u.createdAt = createdAt
+	u.CreatedAt = createdAt
 }
 
-func (u *User) UpdatedAt() time.Time {
-	return u.updatedAt
+func (u *User) GetUpdatedAt() time.Time {
+	return u.UpdatedAt
 }
 
 func (u *User) SetUpdatedAt(updatedAt time.Time) {
-	u.updatedAt = updatedAt
+	u.UpdatedAt = updatedAt
 }
