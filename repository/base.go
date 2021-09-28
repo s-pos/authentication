@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"time"
 
 	"spos/auth/models"
@@ -24,6 +25,17 @@ type Repository interface {
 
 	// InsertNewUser query for create a.k.a register new user
 	InsertNewUser(user *models.User) (*models.User, error)
+
+	// InsertFcmToken will add new token after user success login
+	InsertFcmToken(user *models.User) (*models.FcmToken, error)
+
+	// SetAccessToken for login section.
+	// this function will be set access token and will store to redis
+	// with key uuid string and value user data + fcm
+	SetAccessToken(ctx context.Context, user *models.User) (string, int64, error)
+
+	// GetRedisData for global get data from redis
+	GetRedisData(ctx context.Context, key string) (string, error)
 }
 
 func New(db *sqlx.DB, redis *redis.Client, location *time.Location) Repository {
