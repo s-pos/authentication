@@ -36,6 +36,15 @@ type Repository interface {
 
 	// GetRedisData for global get data from redis
 	GetRedisData(ctx context.Context, key string) (string, error)
+
+	// GetUserVerification will return data user verification
+	GetUserVerification(userId int, medium, dest string) (*models.UserVerification, error)
+
+	// NewUserVerification query insert for new user (register)
+	NewUserVerification(userVerification *models.UserVerification) (*models.UserVerification, error)
+
+	// UpdateUserVerification query untuk update data deeplink, otp, request_count, e.t.c
+	UpdateUserVerification(userVerification *models.UserVerification) (*models.UserVerification, error)
 }
 
 func New(db *sqlx.DB, redis *redis.Client, location *time.Location) Repository {

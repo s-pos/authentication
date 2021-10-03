@@ -18,6 +18,9 @@ type usecase struct {
 type Usecase interface {
 	// Login logic for user doing login
 	Login(ctx context.Context, req models.RequestLogin) response.Output
+
+	// Register logic for user doing register
+	Register(ctx context.Context, req models.RequestRegister) response.Output
 }
 
 func New(repo repository.Repository, loc *time.Location) Usecase {
