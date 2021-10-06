@@ -49,10 +49,14 @@ jobs:
       #     docker login -u ${{ env.DOCKER_USERNAME }} -p ${{ env.DOCKER_PASSWORD }} && \
       #     docker push ${{ env.DOCKER_URL }}:testing
 
+      - name: testing
+        run: |
+          kubectl get ns
+
       ## deploy
-      - name: Deploy with Helm Chart
-        uses: wahyd4/kubectl-helm-action@master
-        env:
-          KUBE_CONFIG_DATA: ${{ env.KUBE_DATA }}
-        with:
-          args: helm upgrade ${{ env.SERVICE_NAME }} --install ./.helm-chart -n ${{ env.NAMESPACE }} --set image.repository=${{ env.DOCKER_URL }} --set image.tag=testing --set ingress.host=${{ env.HOST }} --set ingress.tlshosts={"${{ env.HOST }}"} --set ingress.paths={"${{ env.ENDPOINT }}"}
+      # - name: Deploy with Helm Chart
+      #   uses: wahyd4/kubectl-helm-action@master
+      #   env:
+      #     KUBE_CONFIG_DATA: ${{ env.KUBE_DATA }}
+      #   with:
+      #     args: helm upgrade ${{ env.SERVICE_NAME }} --install ./.helm-chart -n ${{ env.NAMESPACE }} --set image.repository=${{ env.DOCKER_URL }} --set image.tag=testing --set ingress.host=${{ env.HOST }} --set ingress.tlshosts={"${{ env.HOST }}"} --set ingress.paths={"${{ env.ENDPOINT }}"}
