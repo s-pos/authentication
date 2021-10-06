@@ -51,7 +51,8 @@ jobs:
 
       - name: testing
         run: |
-          kubectl get ns
+          kubectl get ns && \
+          helm list -n bri-invest
 
       ## deploy
       # - name: Deploy with Helm Chart
