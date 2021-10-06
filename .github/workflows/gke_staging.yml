@@ -44,6 +44,7 @@ jobs:
       ## push image
       - name: Push Image
         run: |-
+          docker login -u ${{ env.DOCKER_USERNAME }} -p ${{ env.DOCKER_PASSWORD }} && \
           docker push ${{ env.DOCKER_URL }}:testing
 
       ## deploy
