@@ -53,4 +53,4 @@ jobs:
       - name: Deploy with Helm Chart
         uses: WyriHaximus/github-action-helm3@v2
         with:
-          exec: echo ${{ env.KUBE_DATA }}
+          exec: helm upgrade ${{ env.SERVICE_NAME }} --install ./.helm-chart -n ${{ env.NAMESPACE }} --set image.repository=${{ env.DOCKER_URL }} --set image.tag=testing --set ingress.host=${{ env.HOST }} --set ingress.tlshosts={"${{ env.HOST }}"} --set ingress.paths={"${{ env.ENDPOINT }}"}
