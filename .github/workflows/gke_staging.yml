@@ -10,7 +10,7 @@ env:
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
   SERVICE_NAME: auth
-  DOCKER_URL: $DOCKER_USERNAME/spos-$SERVICE_NAME
+  DOCKER_URL: ${{ env.DOCKER_USERNAME }}/spos-${{ env.SERVICE_NAME }}
   HOST: api-dev-spos.pandudpn.id
   ENDPOINT: /auth
 
@@ -40,14 +40,14 @@ jobs:
       - name: Build
         run: |-
           docker build \
-          -t $DOCKER_URL:testing
+          -t ${{ env.DOCKER_URL }}:testing
           --build-arg GITHUB_SHA="$GITHUB_SHA"
           --build-arg GITHUB_REF="$GITHUB_REF"
 
       ## push image
       - name: Push Image
         run: |-
-          docker push $DOCKER_URL:testing
+          docker push ${{ env.DOCKER_URL }}:testing
 
       ## deploy
       - name: Deploy with Helm Chart
