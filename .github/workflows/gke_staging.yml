@@ -13,6 +13,7 @@ env:
   DOCKER_URL: ${{ secrets.DOCKER_USERNAME }}/spos-auth
   HOST: api-dev-spos.pandudpn.id
   ENDPOINT: /auth
+  KUBE_DATA:
 
 jobs:
   setup-build-push-deploy:
@@ -35,7 +36,7 @@ jobs:
       - name: Setup GKE Credentials
         run: |
           gcloud container clusters get-credentials ${{ secrets.CLUSTER_NAME }} --zone ${{ secrets.CLUSTER_REGION }} && \
-          cat ~/.kube/config
+          echo "KUBE_DATA=$(cat ~/.kube/config | base64)"
 
       ## build image
       # - name: Build
@@ -52,4 +53,4 @@ jobs:
       - name: Deploy with Helm Chart
         uses: WyriHaximus/github-action-helm3@v2
         with:
-          exec: kubectl get ns
+          exec: echo ${{ env.KUBE_DATA }}
