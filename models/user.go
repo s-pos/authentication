@@ -1,6 +1,9 @@
 package models
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 type User struct {
 	ID                  int        `db:"id"`
@@ -70,7 +73,14 @@ func (u *User) GetPhone() string {
 }
 
 func (u *User) SetPhone(phone string) {
-	u.Phone = phone
+	switch {
+	case phone[:1] == "0":
+		u.Phone = fmt.Sprintf("62%s", phone[1:])
+	case phone[:1] == "8":
+		u.Phone = fmt.Sprintf("62%s", phone[1:])
+	case phone[:2] == "62":
+		u.Phone = phone
+	}
 }
 
 func (u *User) GetEmailVerificationAt() *time.Time {

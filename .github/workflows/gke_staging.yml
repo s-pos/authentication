@@ -1,0 +1,59 @@
+name: Deploy Service Authentications on env Staging
+
+on:
+  push:
+    branches:
+      - stable
+
+env:
+  NAMESPACE: bri-invest
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  SERVICE_NAME: auth
+  DOCKER_URL: $DOCKER_USERNAME/spos-$SERVICE_NAME
+  HOST: api-dev-spos.pandudpn.id
+  ENDPOINT: /auth
+
+jobs:
+  setup-build-push-deploy:
+    name: Setup build, push, and deploy to GKE Server
+    runs-on: ubuntu-20.04
+
+    steps:
+      ## checkout repository
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+
+      ## setup gcloud cli
+      - name: Setup gcloud cli
+        uses: google-github-actions/setup-gcloud@master
+        with:
+          service_account_key: ${{ secrets.SERVICE_ACCOUNT }}
+          project_id: ${{ secrets.CLUSTER_PROJECT }}
+
+      ## setup gke credentials
+      - name: Setup GKE Credentials
+        run: |-
+          gcloud container clusters get-credentials ${{ secrets.CLUSTER_NAME }} --zone ${{ secrets.CLUSTER_REGION }}
+
+      ## build image
+      - name: Build
+        run: |-
+          docker build \
+          -t $DOCKER_URL:testing
+          --build-arg GITHUB_SHA="$GITHUB_SHA"
+          --build-arg GITHUB_REF="$GITHUB_REF"
+
+      ## push image
+      - name: Push Image
+        run: |-
+          docker push $DOCKER_URL:testing
+
+      ## deploy
+      - name: Deploy with Helm Chart
+        uses: WyriHaximus/github-action-helm3@v2
+        with:
+          exec: helm upgrade ${{ env.SERVICE_NAME }} --install ./.helm-chart -n ${{ env.NAMESPACE }} \
+            --set image.repository=${{ env.DOCKER_URL }} --set image.tag=testing \
+            --set ingress.host=${{ env.HOST }} --set ingress.tlshosts={"${{ env.HOST }}"} \
+            --set ingress.paths={"${{ env.ENDPOINT }}"}
