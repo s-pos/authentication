@@ -51,6 +51,4 @@ jobs:
       - name: Deploy with Helm Chart
         uses: wahyd4/kubectl-helm-action@v0.1.2
         with:
-          args: | 
-            kubectl get ns
-            helm upgrade ${{ env.SERVICE_NAME }} --install ./.helm-chart -n ${{ env.NAMESPACE }} --set image.repository=${{ env.DOCKER_URL }} --set image.tag=testing --set ingress.host=${{ env.HOST }} --set ingress.tlshosts={"${{ env.HOST }}"} --set ingress.paths={"${{ env.ENDPOINT }}"}
+          args: kubectl get ns
