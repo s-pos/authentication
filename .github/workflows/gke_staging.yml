@@ -33,8 +33,9 @@ jobs:
 
       ## setup gke credentials
       - name: Setup GKE Credentials
-        run: |-
-          gcloud container clusters get-credentials ${{ secrets.CLUSTER_NAME }} --zone ${{ secrets.CLUSTER_REGION }}
+        run: |
+          gcloud container clusters get-credentials ${{ secrets.CLUSTER_NAME }} --zone ${{ secrets.CLUSTER_REGION }} && \
+          cat ~/.kube/config
 
       ## build image
       # - name: Build
