@@ -39,10 +39,7 @@ jobs:
       ## build image
       - name: Build
         run: |-
-          docker build \
-          -t ${{ env.DOCKER_URL }}:testing
-          --build-arg GITHUB_SHA="$GITHUB_SHA"
-          --build-arg GITHUB_REF="$GITHUB_REF" .
+          docker build -t ${{ env.DOCKER_URL }}:testing .
 
       ## push image
       - name: Push Image
