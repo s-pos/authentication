@@ -9,8 +9,10 @@ env:
   NAMESPACE: bri-invest
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-  SERVICE_NAME: authentications
+  SERVICE_NAME: auth
   DOCKER_URL: $DOCKER_USERNAME/spos-$SERVICE_NAME
+  HOST: api-dev-spos.pandudpn.id
+  ENDPOINT: /auth
 
 jobs:
   setup-build-push-deploy:
@@ -47,4 +49,11 @@ jobs:
         run: |-
           docker push $DOCKER_URL:testing
 
-      
+      ## deploy
+      - name: Deploy with Helm Chart
+        uses: WyriHaximus/github-action-helm3@v2
+        with:
+          exec: helm upgrade ${{ env.SERVICE_NAME }} --install ./.helm-chart -n ${{ env.NAMESPACE }} \
+            --set image.repository=${{ env.DOCKER_URL }} --set image.tag=testing \
+            --set ingress.host=${{ env.HOST }} --set ingress.tlshosts={"${{ env.HOST }}"} \
+            --set ingress.paths={"${{ env.ENDPOINT }}"}

@@ -9,7 +9,7 @@ podAnnotations:
 
 image:
   pullPolicy: Always
-imagePullSecrets: gitlab-credentials
+imagePullSecrets: docker-io-credentials
 
 nameOverride: ""
 fullnameOverride: ""
@@ -28,13 +28,10 @@ ingress:
     nginx.ingress.kubernetes.io/proxy-body-size: "0"
     nginx.ingress.kubernetes.io/rewrite-target: /$2
     nginx.ingress.kubernetes.io/server-snippet: |-
-      if ($http_user_agent !~* "(okhttp|Dart)" ) {
-        return 405;
-      }
       location ~* ^/(metrics|health|liveness|debug|live) {
       error_page 404 /404.html;
       }
-  tlssecret: be-biy-tls
+  tlssecret: be-dev-tls
 
 resources:
   limits:
