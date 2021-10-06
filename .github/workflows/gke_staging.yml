@@ -10,7 +10,7 @@ env:
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
   SERVICE_NAME: auth
-  DOCKER_URL: ${{ env.DOCKER_USERNAME }}/spos-${{ env.SERVICE_NAME }}
+  DOCKER_URL: ${{ secrets.DOCKER_USERNAME }}/spos-auth
   HOST: api-dev-spos.pandudpn.id
   ENDPOINT: /auth
 
