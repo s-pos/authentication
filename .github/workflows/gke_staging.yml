@@ -51,7 +51,7 @@ jobs:
 
       ## deploy
       - name: Deploy with Helm Chart
-        uses: WyriHaximus/github-action-helm3@v2
+        uses: wahyd4/kubectl-helm-action@master
         env:
           KUBE_CONFIG_DATA: ${{ env.KUBE_DATA }}
         with:
