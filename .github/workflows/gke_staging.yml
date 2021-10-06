@@ -52,9 +52,4 @@ jobs:
       ## deployment k8s
       - name: Deploy to k8s
         run: |
-          helm upgrade ${{ env.SERVICE_NAME }} --install ./.helm-chart \ 
-            -n ${{ env.NAMESPACE }} --set image.repository=${{ env.DOCKER_URL }} \
-            --set image.tag=testing --set ingress.host=${{ env.HOST }} \
-            --set ingress.tlshosts={"${{ env.HOST }}"} \
-            --set ingress.paths={"${{ env.ENDPOINT }}"} && \
-          kubectl rollout restart deploy/${{ env.SERVICE_NAME }} -n ${{ env.NAMESPACE }}
+          helm upgrade ${{ env.SERVICE_NAME }} --install ./.helm-chart -n ${{ env.NAMESPACE }} --set image.repository=${{ env.DOCKER_URL }} --set image.tag=testing --set ingress.host=${{ env.HOST }} --set ingress.tlshosts={"${{ env.HOST }}"} --set ingress.paths={"${{ env.ENDPOINT }}"} && kubectl rollout restart deploy/${{ env.SERVICE_NAME }} -n ${{ env.NAMESPACE }}
