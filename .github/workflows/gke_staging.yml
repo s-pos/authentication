@@ -49,6 +49,6 @@ jobs:
 
       ## deploy
       - name: Deploy with Helm Chart
-        uses: wahyd4/kubectl-helm-action@v0.1.2
+        uses: WyriHaximus/github-action-helm3@v2
         with:
-          args: kubectl get ns
+          exec: kubectl get ns
