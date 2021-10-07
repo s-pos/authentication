@@ -11,7 +11,7 @@ env:
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
   SERVICE_NAME: auth
   DOCKER_URL: ${{ secrets.DOCKER_USERNAME }}/spos-auth
-  HOST: api-dev-spos.pandudpn.id
+  HOST: api-dev.brinvestyuk.com
   ENDPOINT: /auth
   KUBE_DATA:
 

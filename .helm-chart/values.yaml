@@ -13,7 +13,7 @@ imagePullSecrets: docker-io-credentials
 
 nameOverride: ""
 fullnameOverride: ""
-configmap: bri-invest-dev
+configmap: spos-dev
 
 service:
   type: ClusterIP
