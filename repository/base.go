@@ -34,6 +34,9 @@ type Repository interface {
 	// with key uuid string and value user data + fcm
 	SetAccessToken(ctx context.Context, user *models.User) (string, int64, error)
 
+	// SetToken using for otp
+	SetToken(ctx context.Context, data interface{}, isResetPassword bool) (string, error)
+
 	// GetRedisData for global get data from redis
 	GetRedisData(ctx context.Context, key string) (string, error)
 

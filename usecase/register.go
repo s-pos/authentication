@@ -15,14 +15,30 @@ import (
 func (u *usecase) Register(ctx context.Context, req models.RequestRegister) response.Output {
 	user, err := u.repository.GetUserByEmail(req.Email)
 	if err == nil {
+		// if email already verified
+		// send error response email already used
 		if user.IsEmailVerified() {
 			err = fmt.Errorf("email already used")
 			return response.Errors(ctx, http.StatusBadRequest, string(constant.UserEmailAlreadyUsed), constant.Message[constant.RegisterFailed], constant.Reason[constant.UserEmailAlreadyUsed], err)
 		}
-		err = fmt.Errorf("dibuat error dulu aja")
-		return response.Errors(ctx, http.StatusBadRequest, string(constant.UserEmailAlreadyUsed), constant.Message[constant.RegisterFailed], constant.Reason[constant.UserEmailAlreadyUsed], err)
+
+		// checking if email not yet verified but password is wrong
+		// then send error response email already used
+		// that means that user want to regist but wrong password (like login)
+		if err := bcrypt.CompareHashAndPassword([]byte(user.GetPassword()), []byte(req.Password)); err != nil {
+			err = fmt.Errorf("email already used")
+			return response.Errors(ctx, http.StatusBadRequest, string(constant.UserEmailAlreadyUsed), constant.Message[constant.RegisterFailed], constant.Reason[constant.UserEmailAlreadyUsed], err)
+		}
+
+		resAuthClient, err := u.authClient.SendEmailVerification(ctx, user)
+		if err != nil {
+			return response.Errors(ctx, http.StatusInternalServerError, string(constant.ErrorUnmarshal), constant.Message[constant.RegisterFailed], constant.ErrorGlobal, err)
+		}
+
+		return response.Success(ctx, http.StatusOK, string(constant.RegisterSuccess), constant.Message[constant.RegisterSuccess], resAuthClient.GetMessage())
 	}
 
+	// set no telp and will return 628xxxx
 	user.SetPhone(req.PhoneNumber)
 	user, err = u.repository.GetUserByPhone(user.GetPhone())
 	if err == nil {
@@ -41,6 +57,11 @@ func (u *usecase) Register(ctx context.Context, req models.RequestRegister) resp
 	user, err = u.repository.InsertNewUser(user)
 	if err != nil {
 		return response.Errors(ctx, http.StatusBadRequest, string(constant.ErrorQueryInsert), constant.Message[constant.RegisterFailed], constant.ErrorGlobal, err)
+	}
+
+	_, err = u.authClient.SendEmailVerification(ctx, user)
+	if err != nil {
+		return response.Errors(ctx, http.StatusInternalServerError, string(constant.ErrorUnmarshal), constant.Message[constant.RegisterFailed], constant.ErrorGlobal, err)
 	}
 
 	return response.Success(ctx, http.StatusCreated, string(constant.RegisterSuccess), constant.Message[constant.RegisterSuccess], fmt.Sprintf(constant.RegisterSuccessMessage, user.GetEmail()))

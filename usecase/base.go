@@ -6,11 +6,13 @@ import (
 
 	"spos/auth/models"
 	"spos/auth/repository"
+	"spos/auth/usecase/rpc"
 
 	"github.com/s-pos/go-utils/utils/response"
 )
 
 type usecase struct {
+	authClient rpc.AuthClient
 	repository repository.Repository
 	location   *time.Location
 }
@@ -23,8 +25,9 @@ type Usecase interface {
 	Register(ctx context.Context, req models.RequestRegister) response.Output
 }
 
-func New(repo repository.Repository, loc *time.Location) Usecase {
+func New(rpc rpc.AuthClient, repo repository.Repository, loc *time.Location) Usecase {
 	return &usecase{
+		authClient: rpc,
 		repository: repo,
 		location:   loc,
 	}
