@@ -10,9 +10,10 @@ env:
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
   SERVICE_NAME: auth
-  DOCKER_URL: $DOCKER_USERNAME/spos-$SERVICE_NAME
+  DOCKER_URL: ${{ secrets.DOCKER_USERNAME }}/spos-auth
   HOST: api-dev-spos.pandudpn.id
   ENDPOINT: /auth
+  KUBE_DATA:
 
 jobs:
   setup-build-push-deploy:
@@ -33,27 +34,22 @@ jobs:
 
       ## setup gke credentials
       - name: Setup GKE Credentials
-        run: |-
-          gcloud container clusters get-credentials ${{ secrets.CLUSTER_NAME }} --zone ${{ secrets.CLUSTER_REGION }}
+        run: |
+          gcloud container clusters get-credentials ${{ secrets.CLUSTER_NAME }} --zone ${{ secrets.CLUSTER_REGION }} && \
+          echo "KUBE_DATA=$(cat ~/.kube/config | base64)"
 
-      ## build image
+      # build image
       - name: Build
         run: |-
-          docker build \
-          -t $DOCKER_URL:testing
-          --build-arg GITHUB_SHA="$GITHUB_SHA"
-          --build-arg GITHUB_REF="$GITHUB_REF"
+          docker build -t ${{ env.DOCKER_URL }}:testing .
 
       ## push image
       - name: Push Image
         run: |-
-          docker push $DOCKER_URL:testing
+          docker login -u ${{ env.DOCKER_USERNAME }} -p ${{ env.DOCKER_PASSWORD }} && \
+          docker push ${{ env.DOCKER_URL }}:testing
 
-      ## deploy
-      - name: Deploy with Helm Chart
-        uses: WyriHaximus/github-action-helm3@v2
-        with:
-          exec: helm upgrade ${{ env.SERVICE_NAME }} --install ./.helm-chart -n ${{ env.NAMESPACE }} \
-            --set image.repository=${{ env.DOCKER_URL }} --set image.tag=testing \
-            --set ingress.host=${{ env.HOST }} --set ingress.tlshosts={"${{ env.HOST }}"} \
-            --set ingress.paths={"${{ env.ENDPOINT }}"}
+      ## deployment k8s
+      - name: Deploy to k8s
+        run: |
+          helm upgrade ${{ env.SERVICE_NAME }} --install ./.helm-chart -n ${{ env.NAMESPACE }} --set image.repository=${{ env.DOCKER_URL }} --set image.tag=testing --set ingress.host=${{ env.HOST }} --set ingress.tlshosts={"${{ env.HOST }}"} --set ingress.paths={"${{ env.ENDPOINT }}"} && kubectl rollout restart deploy/${{ env.SERVICE_NAME }} -n ${{ env.NAMESPACE }}
