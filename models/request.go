@@ -13,3 +13,8 @@ type RequestRegister struct {
 	PhoneNumber string `json:"phone_number" required:"json"`
 	Name        string `json:"name" required:"json"`
 }
+
+type RequestVerificationOTP struct {
+	Email string `json:"email" required:"json"`
+	OTP   string `json:"otp" required:"json"`
+}

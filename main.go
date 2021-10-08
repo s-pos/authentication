@@ -5,6 +5,7 @@ import (
 	"spos/auth/repository"
 	"spos/auth/routes"
 	"spos/auth/usecase"
+	"spos/auth/usecase/rpc"
 
 	"github.com/s-pos/go-utils/adapter"
 	"github.com/s-pos/go-utils/config"
@@ -30,8 +31,11 @@ func main() {
 	// repository will be here
 	baseRepo := repository.New(db, redis, timezone)
 
+	// all rpc client will be here
+	authRpcClient := rpc.NewAuthClient(baseRepo, timezone)
+
 	// all usecase will be here
-	baseUsecase := usecase.New(baseRepo, timezone)
+	baseUsecase := usecase.New(authRpcClient, baseRepo, timezone)
 
 	// all controller will be here
 	baseController := controllers.New(baseUsecase)

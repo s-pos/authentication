@@ -1,20 +1,23 @@
 package repository
 
-import "spos/auth/models"
+import (
+	"spos/auth/models"
+)
 
-func (r *repo) GetUserVerification(userId int, medium, dest string) (*models.UserVerification, error) {
+func (r *repo) GetUserVerificationByDestination(medium, dest string) (*models.UserVerification, error) {
 	var (
-		user models.UserVerification
-		err  error
+		uv  models.UserVerification
+		err error
 	)
 	query := `select
 			id, user_id, "type", request_count,
-			submit_count, updated_at, deeplink, otp
+			submit_count, updated_at, deeplink, otp,
+       		medium, destination, created_at, submited_at
 			from user_verifications
-			where user_id=$1 and medium=$2 and destination=$3`
+			where medium=$1 and destination=$2`
 
-	err = r.db.Get(&user, query, userId, medium, dest)
-	return &user, err
+	err = r.db.Get(&uv, query, medium, dest)
+	return &uv, err
 }
 
 func (r *repo) NewUserVerification(userVerification *models.UserVerification) (*models.UserVerification, error) {
@@ -31,8 +34,8 @@ func (r *repo) NewUserVerification(userVerification *models.UserVerification) (*
 		userVerification.GetType(), userVerification.GetMedium(),
 		userVerification.GetDestination(), userVerification.GetRequestCount(),
 		userVerification.GetDeeplink(), userVerification.GetOTP(),
-		userVerification.GetSubmitCount(), userVerification.GetCreatedAt(),
-		userVerification.GetUpdatedAt(),
+		userVerification.GetSubmitCount(), userVerification.GetCreatedAt().UTC(),
+		userVerification.GetUpdatedAt().UTC(),
 	).StructScan(&uv)
 	if err != nil {
 		tx.Rollback()
@@ -50,15 +53,14 @@ func (r *repo) UpdateUserVerification(userVerification *models.UserVerification)
 		tx  = r.db.MustBegin()
 	)
 	query := `update user_verifications set
-			request_count=$1, submit_count=$2, updated_at=$3,
-            deeplink=$4, otp=$5
-			where user_id=$6 and destination=$7 and medium=$8`
+						request_count=$1, submit_count=$2, updated_at=$3,
+            deeplink=$4, otp=$5, submited_at=$7
+						where id=$6 returning id`
 	err = tx.QueryRowx(
 		query, userVerification.GetRequestCount(),
-		userVerification.GetSubmitCount(), userVerification.GetUpdatedAt(),
+		userVerification.GetSubmitCount(), userVerification.GetUpdatedAt().UTC(),
 		userVerification.GetDeeplink(), userVerification.GetOTP(),
-		userVerification.GetId(), userVerification.GetDestination(),
-		userVerification.GetMedium(),
+		userVerification.GetId(), userVerification.GetSubmitedAt().UTC(),
 	).StructScan(&uv)
 	if err != nil {
 		tx.Rollback()

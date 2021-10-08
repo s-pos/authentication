@@ -84,23 +84,29 @@ func (u *User) SetPhone(phone string) {
 }
 
 func (u *User) GetEmailVerificationAt() *time.Time {
+	if u.EmailVerificationAt == nil {
+		return &time.Time{}
+	}
 	return u.EmailVerificationAt
 }
 
-func (u *User) SetEmailVerificationAt(emailVerificationAt *time.Time) {
-	u.EmailVerificationAt = emailVerificationAt
+func (u *User) SetEmailVerificationAt(emailVerificationAt time.Time) {
+	u.EmailVerificationAt = &emailVerificationAt
 }
 
 func (u *User) IsEmailVerified() bool {
-	return u.GetEmailVerificationAt() != nil
+	return u.GetEmailVerificationAt() != nil && !u.GetEmailVerificationAt().IsZero()
 }
 
 func (u *User) GetPhoneVerificationAt() *time.Time {
+	if u.PhoneVerificationAt == nil {
+		return &time.Time{}
+	}
 	return u.PhoneVerificationAt
 }
 
-func (u *User) SetPhoneVerificationAt(phoneVerificationAt *time.Time) {
-	u.PhoneVerificationAt = phoneVerificationAt
+func (u *User) SetPhoneVerificationAt(phoneVerificationAt time.Time) {
+	u.PhoneVerificationAt = &phoneVerificationAt
 }
 
 func (u *User) GetCreatedAt() time.Time {

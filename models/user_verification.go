@@ -1,19 +1,23 @@
 package models
 
-import "time"
+import (
+	"os"
+	"time"
+)
 
 type UserVerification struct {
-	ID           int       `db:"id"`
-	UserID       int       `db:"user_id"`
-	Type         string    `db:"type"`        // it will be 'register' and 'forgot_password' or 'phone_verification'
-	Medium       string    `db:"medium"`      // it will be 'email' or 'phone'
-	Destination  string    `db:"destination"` // it will be phone_number or email user
-	RequestCount int       `db:"request_count"`
-	SubmitCount  int       `db:"submit_count"`
-	Deeplink     string    `db:"deeplink"`
-	OTP          string    `db:"string"`
-	CreatedAt    time.Time `db:"created_at"`
-	UpdatedAt    time.Time `db:"updated_at"`
+	ID           int        `db:"id"`
+	UserID       int        `db:"user_id"`
+	Type         string     `db:"type"`        // it will be 'register' and 'forgot_password' or 'phone_verification'
+	Medium       string     `db:"medium"`      // it will be 'email' or 'phone'
+	Destination  string     `db:"destination"` // it will be phone_number or email user
+	RequestCount int        `db:"request_count"`
+	SubmitCount  *int       `db:"submit_count"`
+	Deeplink     *string    `db:"deeplink"`
+	OTP          *string    `db:"otp"`
+	CreatedAt    time.Time  `db:"created_at"`
+	UpdatedAt    *time.Time `db:"updated_at"`
+	SubmitedAt   *time.Time `db:"submited_at"`
 }
 
 func (uv *UserVerification) GetId() int {
@@ -53,19 +57,27 @@ func (uv *UserVerification) GetDestination() string {
 }
 
 func (uv *UserVerification) SetDeeplink(deeplink string) {
-	uv.Deeplink = deeplink
+	uv.Deeplink = &deeplink
 }
 
 func (uv *UserVerification) GetDeeplink() string {
-	return uv.Deeplink
+	if uv.Deeplink == nil {
+		return ""
+	}
+
+	return *uv.Deeplink
 }
 
 func (uv *UserVerification) SetOTP(otp string) {
-	uv.OTP = otp
+	uv.OTP = &otp
 }
 
 func (uv *UserVerification) GetOTP() string {
-	return uv.OTP
+	if uv.OTP == nil {
+		return ""
+	}
+
+	return *uv.OTP
 }
 
 func (uv *UserVerification) SetRequestCount(requestCount int) {
@@ -77,11 +89,14 @@ func (uv *UserVerification) GetRequestCount() int {
 }
 
 func (uv *UserVerification) SetSubmitCount(submitCount int) {
-	uv.SubmitCount = submitCount
+	uv.SubmitCount = &submitCount
 }
 
 func (uv *UserVerification) GetSubmitCount() int {
-	return uv.SubmitCount
+	if uv.SubmitCount == nil {
+		return 0
+	}
+	return *uv.SubmitCount
 }
 
 func (uv *UserVerification) SetCreatedAt(createdAt time.Time) {
@@ -89,13 +104,51 @@ func (uv *UserVerification) SetCreatedAt(createdAt time.Time) {
 }
 
 func (uv *UserVerification) GetCreatedAt() time.Time {
-	return uv.CreatedAt
+	return convertTimezone(uv.CreatedAt)
 }
 
 func (uv *UserVerification) SetUpdatedAt(updatedAt time.Time) {
-	uv.UpdatedAt = updatedAt
+	uv.UpdatedAt = &updatedAt
 }
 
-func (uv *UserVerification) GetUpdatedAt() time.Time {
-	return uv.UpdatedAt
+func (uv *UserVerification) GetUpdatedAt() *time.Time {
+	if uv.UpdatedAt == nil {
+		return nil
+	}
+
+	updatedAt := convertTimezone(*uv.UpdatedAt)
+	return &updatedAt
+}
+
+func (uv *UserVerification) SetSubmitedAt(submitedAt time.Time) {
+	uv.SubmitedAt = &submitedAt
+}
+
+func (uv *UserVerification) GetSubmitedAt() *time.Time {
+	if uv.SubmitedAt == nil {
+		return &time.Time{}
+	}
+
+	submitedAt := convertTimezone(*uv.SubmitedAt)
+	return &submitedAt
+}
+
+func (uv *UserVerification) IsReadyToSend() bool {
+	var (
+		now           = time.Now().In(timezone)
+		otpTime       time.Time
+		otpExpired, _ = time.ParseDuration(os.Getenv("OTP_EXPIRED"))
+	)
+
+	otpTime = uv.GetCreatedAt()
+	if uv.RequestCount > 1 {
+		if uv.GetUpdatedAt() != nil {
+			otpTime = *uv.GetUpdatedAt()
+		} else {
+			otpTime = uv.GetCreatedAt()
+		}
+	}
+	otpTime = otpTime.Add(otpExpired)
+
+	return now.After(otpTime)
 }

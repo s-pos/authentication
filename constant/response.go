@@ -18,6 +18,14 @@ const (
 	// RegisterFailed code for failed register
 	RegisterFailed Code = "101090"
 
+	// VerificationSuccess code for success verification register with otp
+	VerificationSuccess Code = "101110"
+	// VerificationFailed code for failed verification register
+	VerificationFailed Code = "101190"
+	// VerificationUserFailed code for failed on userVerification
+	// query find or updated
+	VerificationUserFailed Code = "101191"
+
 	// UserNotFound when user try to login but email not found from database
 	UserNotFound Code = "108140"
 	// UserPasswordNotMatch password not match from database with request payload
@@ -30,6 +38,11 @@ const (
 	UserPhoneAlreadyUsed Code = "108144"
 	// UserAlreadyRequestOTP interval 2 minutes for another request OTP
 	UserAlreadyRequestOTP Code = "108145"
+	// UserEmailNotSame email from redis and from request not same
+	// during verification register
+	UserEmailNotSame Code = "108146"
+	// OTPInvalid otp not found or expired in redis
+	OTPInvalid Code = "108540"
 
 	/* ========== GLOBAL ERROR WILL BE HERE ========== */
 
@@ -61,15 +74,23 @@ var (
 
 		RegisterSuccess: "register.success",
 		RegisterFailed:  "register.failed",
+
+		VerificationSuccess: "verification.success",
+		VerificationFailed:  "verification.failed",
+
+		UserAlreadyRequestOTP: "request.failed",
 	}
 
 	Reason = map[Code]string{
+		VerificationSuccess:   "Verifikasi berhasil, silakan login",
 		UserNotFound:          "User tidak ditemukan",
 		UserPasswordNotMatch:  "Email atau Password tidak sesuai",
 		UserNotVerified:       "Anda belum melakukan verifikasi, silakan verifikasi diri Anda terlebih dahulu",
 		UserEmailAlreadyUsed:  "Email telah digunakan, silakan gunakan email lain",
 		UserPhoneAlreadyUsed:  "Nomor telepon telah digunakan, silakan gunakan nomor yang lain",
 		UserAlreadyRequestOTP: "Anda baru saja melakukan permintaan pengiriman OTP, tunggu beberapa saat lagi",
+		UserEmailNotSame:      "Permintaan kode verifikasi tidak valid",
+		OTPInvalid:            "Kode verifikasi tidak ditemukan atau sudah tidak berlaku",
 
 		BodyRequired: "Permintaan tidak lengkap, silakan cek kembali",
 	}

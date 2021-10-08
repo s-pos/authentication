@@ -16,6 +16,10 @@ type Controller interface {
 
 	// RegisterHandler handler for user register
 	RegisterHandler(e echo.Context) error
+
+	// VerificationRegisterHandler handler for verification register
+	// using OTP
+	VerificationRegisterHandler(e echo.Context) error
 }
 
 func New(uc usecase.Usecase) Controller {
