@@ -257,8 +257,8 @@ github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFR
 github.com/rs/xid v1.2.1/go.mod h1:+uKXf+4Djp6Md1KODXJxgGQPKngRmWyn10oCKFzNHOQ=
 github.com/rs/zerolog v1.13.0/go.mod h1:YbFCdg8HfsridGWAh22vktObvhZbQsZXe4/zB0OKkWU=
 github.com/rs/zerolog v1.15.0/go.mod h1:xYTKnLHcpfU2225ny5qZjxnj9NvkumZYjJHlAThCjNc=
-github.com/s-pos/go-utils v1.0.0 h1:RidT3VPMmtZVkBplUQwTTCNGeoUC4eI7f/yJbkEc6Qg=
-github.com/s-pos/go-utils v1.0.0/go.mod h1:jSIPp5o42DTqCXXxAshV1OHV6gWYNtuMpI6VfvuipHE=
+github.com/s-pos/go-utils v1.0.2 h1:GEaLD1YPTpFuCJ56yAS8coNZT7nFv6EHZ7s+hCBfrTE=
+github.com/s-pos/go-utils v1.0.2/go.mod h1:jSIPp5o42DTqCXXxAshV1OHV6gWYNtuMpI6VfvuipHE=
 github.com/s-pos/protobuf v1.0.1 h1:Gdt2+cXXJebASqaaGu2qn5LieEknzCCpIOB52TIlwK4=
 github.com/s-pos/protobuf v1.0.1/go.mod h1:sGpjmNpSCHOfQROf9xduMvIOYHa/9gaA7X5JzFKQM9U=
 github.com/satori/go.uuid v1.2.0/go.mod h1:dA0hQrYB0VpLJoorglMZABFdXlWrHn1NEOzdhQKdks0=

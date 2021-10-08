@@ -51,7 +51,7 @@ func (u *usecase) Register(ctx context.Context, req models.RequestRegister) resp
 		wg.Wait()
 		select {
 		case err = <-errChan:
-			return response.Errors(ctx, http.StatusInternalServerError, string(constant.UserAlreadyRequestOTP), constant.Message[constant.RegisterFailed], constant.Reason[constant.UserAlreadyRequestOTP], err)
+			return response.Errors(ctx, http.StatusTooEarly, string(constant.UserAlreadyRequestOTP), constant.Message[constant.RegisterFailed], constant.Reason[constant.UserAlreadyRequestOTP], err)
 		default:
 			close(errChan)
 		}
