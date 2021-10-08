@@ -12,7 +12,7 @@ func (r *repo) GetUserVerificationByDestination(medium, dest string) (*models.Us
 	query := `select
 			id, user_id, "type", request_count,
 			submit_count, updated_at, deeplink, otp,
-       		medium, destination, created_at
+       		medium, destination, created_at, submited_at
 			from user_verifications
 			where medium=$1 and destination=$2`
 
@@ -54,13 +54,13 @@ func (r *repo) UpdateUserVerification(userVerification *models.UserVerification)
 	)
 	query := `update user_verifications set
 						request_count=$1, submit_count=$2, updated_at=$3,
-            deeplink=$4, otp=$5
+            deeplink=$4, otp=$5, submited_at=$7
 						where id=$6 returning id`
 	err = tx.QueryRowx(
 		query, userVerification.GetRequestCount(),
 		userVerification.GetSubmitCount(), userVerification.GetUpdatedAt().UTC(),
 		userVerification.GetDeeplink(), userVerification.GetOTP(),
-		userVerification.GetId(),
+		userVerification.GetId(), userVerification.GetSubmitedAt().UTC(),
 	).StructScan(&uv)
 	if err != nil {
 		tx.Rollback()

@@ -26,6 +26,14 @@ type Repository interface {
 	// InsertNewUser query for create a.k.a register new user
 	InsertNewUser(user *models.User) (*models.User, error)
 
+	// UpdateUser query for update data user
+	// field can be updated only:
+	// 		- password
+	// 		- email_verification_at
+	// 		- phone_verification_at
+	//		- updated_at
+	UpdateUser(user *models.User) (*models.User, error)
+
 	// InsertFcmToken will add new token after user success login
 	InsertFcmToken(user *models.User) (*models.FcmToken, error)
 
@@ -39,6 +47,9 @@ type Repository interface {
 
 	// GetRedisData for global get data from redis
 	GetRedisData(ctx context.Context, key string) (string, error)
+
+	// DeleteRedisData for deleting cache/data on redis
+	DeleteRedisData(ctx context.Context, key string) error
 
 	// GetUserVerificationByDestination will return data user verification
 	GetUserVerificationByDestination(medium, dest string) (*models.UserVerification, error)

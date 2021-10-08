@@ -23,6 +23,9 @@ type Usecase interface {
 
 	// Register logic for user doing register
 	Register(ctx context.Context, req models.RequestRegister) response.Output
+
+	// VerificationRegister logic for user do verification
+	VerificationRegister(ctx context.Context, req models.RequestVerificationOTP) response.Output
 }
 
 func New(rpc rpc.AuthClient, repo repository.Repository, loc *time.Location) Usecase {

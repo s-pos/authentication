@@ -69,3 +69,8 @@ func (r *repo) GetRedisData(ctx context.Context, key string) (string, error) {
 
 	return result.Val(), result.Err()
 }
+
+func (r *repo) DeleteRedisData(ctx context.Context, key string) error {
+	err := r.redis.Del(ctx, key).Err()
+	return err
+}

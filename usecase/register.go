@@ -2,6 +2,8 @@ package usecase
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"net/http"
 	"sync"
@@ -54,6 +56,10 @@ func (u *usecase) Register(ctx context.Context, req models.RequestRegister) resp
 			close(errChan)
 		}
 		return response.Success(ctx, http.StatusOK, string(constant.RegisterSuccess), constant.Message[constant.RegisterSuccess], fmt.Sprintf(constant.RegisterSuccessMessage, user.GetEmail()))
+	}
+
+	if !errors.Is(err, sql.ErrNoRows) {
+		return response.Errors(ctx, http.StatusInternalServerError, string(constant.ErrorQueryFind), constant.Message[constant.RegisterFailed], constant.ErrorGlobal, err)
 	}
 
 	// set no telp and will return 628xxxx

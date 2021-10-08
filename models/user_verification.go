@@ -17,6 +17,7 @@ type UserVerification struct {
 	OTP          *string    `db:"otp"`
 	CreatedAt    time.Time  `db:"created_at"`
 	UpdatedAt    *time.Time `db:"updated_at"`
+	SubmitedAt   *time.Time `db:"submited_at"`
 }
 
 func (uv *UserVerification) GetId() int {
@@ -117,6 +118,19 @@ func (uv *UserVerification) GetUpdatedAt() *time.Time {
 
 	updatedAt := convertTimezone(*uv.UpdatedAt)
 	return &updatedAt
+}
+
+func (uv *UserVerification) SetSubmitedAt(submitedAt time.Time) {
+	uv.SubmitedAt = &submitedAt
+}
+
+func (uv *UserVerification) GetSubmitedAt() *time.Time {
+	if uv.SubmitedAt == nil {
+		return &time.Time{}
+	}
+
+	submitedAt := convertTimezone(*uv.SubmitedAt)
+	return &submitedAt
 }
 
 func (uv *UserVerification) IsReadyToSend() bool {
