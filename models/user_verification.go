@@ -1,6 +1,7 @@
 package models
 
 import (
+	"log"
 	"os"
 	"time"
 )
@@ -149,6 +150,8 @@ func (uv *UserVerification) IsReadyToSend() bool {
 		}
 	}
 	otpTime = otpTime.Add(otpExpired)
+	log.Println(otpTime)
+	log.Println(now)
 
 	return now.After(otpTime)
 }
