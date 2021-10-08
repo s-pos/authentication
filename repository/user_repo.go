@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"log"
 	"time"
 
 	"spos/auth/models"
@@ -59,7 +58,6 @@ func (r *repo) InsertNewUser(user *models.User) (*models.User, error) {
 		tx.Rollback()
 		return user, err
 	}
-	log.Println(user)
 	err = tx.Commit()
 	return user, err
 }

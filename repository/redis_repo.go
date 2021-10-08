@@ -49,7 +49,7 @@ func (r *repo) SetToken(ctx context.Context, data interface{}, isResetPassword b
 	)
 	key = strings.ReplaceAll(key, "-", "")
 
-	if isResetPassword {
+	if !isResetPassword {
 		max := big.NewInt(999999)
 		n, err := rand.Int(rand.Reader, max)
 		if err != nil {

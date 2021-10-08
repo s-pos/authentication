@@ -50,6 +50,7 @@ func (u *usecase) Register(ctx context.Context, req models.RequestRegister) resp
 	if err != nil {
 		return response.Errors(ctx, http.StatusInternalServerError, string(constant.ErrorUnmarshal), constant.Message[constant.RegisterFailed], constant.ErrorGlobal, err)
 	}
+	user.SetPhone(req.PhoneNumber)
 	user.SetPassword(string(passwordByte))
 	user.SetName(req.Name)
 	user.SetEmail(req.Email)

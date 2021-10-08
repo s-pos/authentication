@@ -40,8 +40,8 @@ type Repository interface {
 	// GetRedisData for global get data from redis
 	GetRedisData(ctx context.Context, key string) (string, error)
 
-	// GetUserVerification will return data user verification
-	GetUserVerification(userId int, medium, dest string) (*models.UserVerification, error)
+	// GetUserVerificationByDestination will return data user verification
+	GetUserVerificationByDestination(medium, dest string) (*models.UserVerification, error)
 
 	// NewUserVerification query insert for new user (register)
 	NewUserVerification(userVerification *models.UserVerification) (*models.UserVerification, error)

@@ -32,7 +32,7 @@ func main() {
 	baseRepo := repository.New(db, redis, timezone)
 
 	// all rpc client will be here
-	authRpcClient := rpc.NewAuthClient(baseRepo)
+	authRpcClient := rpc.NewAuthClient(baseRepo, timezone)
 
 	// all usecase will be here
 	baseUsecase := usecase.New(authRpcClient, baseRepo, timezone)

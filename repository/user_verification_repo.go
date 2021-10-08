@@ -1,20 +1,23 @@
 package repository
 
-import "spos/auth/models"
+import (
+	"spos/auth/models"
+)
 
-func (r *repo) GetUserVerification(userId int, medium, dest string) (*models.UserVerification, error) {
+func (r *repo) GetUserVerificationByDestination(medium, dest string) (*models.UserVerification, error) {
 	var (
-		user models.UserVerification
-		err  error
+		uv  models.UserVerification
+		err error
 	)
 	query := `select
 			id, user_id, "type", request_count,
-			submit_count, updated_at, deeplink, otp
+			submit_count, updated_at, deeplink, otp,
+       		medium, destination, created_at
 			from user_verifications
-			where user_id=$1 and medium=$2 and destination=$3`
+			where medium=$1 and destination=$2`
 
-	err = r.db.Get(&user, query, userId, medium, dest)
-	return &user, err
+	err = r.db.Get(&uv, query, medium, dest)
+	return &uv, err
 }
 
 func (r *repo) NewUserVerification(userVerification *models.UserVerification) (*models.UserVerification, error) {

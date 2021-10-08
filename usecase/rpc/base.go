@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"time"
+
 	"spos/auth/models"
 	"spos/auth/repository"
 
@@ -13,6 +15,7 @@ import (
 
 type authClient struct {
 	client     auth.UserAuthServiceClient
+	timezone   *time.Location
 	repository repository.Repository
 }
 
@@ -28,7 +31,7 @@ type AuthClient interface {
 	SendEmailResetPassword(ctx context.Context, user *models.User) (*auth.ResetPasswordReply, error)
 }
 
-func NewAuthClient(repo repository.Repository) AuthClient {
+func NewAuthClient(repo repository.Repository, timezone *time.Location) AuthClient {
 	var (
 		emailGrpcPort = fmt.Sprintf(":%s", os.Getenv("SERVICE_EMAIL_GRPC_PORT"))
 		opts          []grpc.DialOption
@@ -38,6 +41,7 @@ func NewAuthClient(repo repository.Repository) AuthClient {
 	if err != nil {
 		return &authClient{
 			repository: repo,
+			timezone:   timezone,
 		}
 	}
 
@@ -46,5 +50,6 @@ func NewAuthClient(repo repository.Repository) AuthClient {
 	return &authClient{
 		client:     client,
 		repository: repo,
+		timezone:   timezone,
 	}
 }
