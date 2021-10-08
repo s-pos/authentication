@@ -58,6 +58,15 @@ func (ac *authClient) saveUserVerification(user *models.User, medium, types, otp
 	uv, err := ac.repository.GetUserVerificationByDestination(medium, dest)
 	if err == nil {
 		if uv.IsReadyToSend() {
+			uv.SetUpdatedAt(now)
+			uv.SetOTP(otp)
+			uv.SetRequestCount(uv.GetRequestCount() + 1)
+
+			_, err = ac.repository.UpdateUserVerification(uv)
+			if err != nil {
+				return err
+			}
+
 			return nil
 		}
 

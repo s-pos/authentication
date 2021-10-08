@@ -1,7 +1,6 @@
 package models
 
 import (
-	"log"
 	"os"
 	"time"
 )
@@ -112,7 +111,12 @@ func (uv *UserVerification) SetUpdatedAt(updatedAt time.Time) {
 }
 
 func (uv *UserVerification) GetUpdatedAt() *time.Time {
-	return uv.UpdatedAt
+	if uv.UpdatedAt == nil {
+		return nil
+	}
+
+	updatedAt := convertTimezone(*uv.UpdatedAt)
+	return &updatedAt
 }
 
 func (uv *UserVerification) IsReadyToSend() bool {
@@ -121,7 +125,6 @@ func (uv *UserVerification) IsReadyToSend() bool {
 		otpTime       time.Time
 		otpExpired, _ = time.ParseDuration(os.Getenv("OTP_EXPIRED"))
 	)
-	log.Println(otpExpired)
 
 	otpTime = uv.GetCreatedAt()
 	if uv.RequestCount > 1 {
@@ -133,8 +136,5 @@ func (uv *UserVerification) IsReadyToSend() bool {
 	}
 	otpTime = otpTime.Add(otpExpired)
 
-	log.Println(now)
-	log.Println(otpTime)
-	log.Println(now.After(otpTime))
-	return otpTime.Add(otpExpired).After(now)
+	return now.After(otpTime)
 }

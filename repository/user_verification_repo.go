@@ -34,8 +34,8 @@ func (r *repo) NewUserVerification(userVerification *models.UserVerification) (*
 		userVerification.GetType(), userVerification.GetMedium(),
 		userVerification.GetDestination(), userVerification.GetRequestCount(),
 		userVerification.GetDeeplink(), userVerification.GetOTP(),
-		userVerification.GetSubmitCount(), userVerification.GetCreatedAt(),
-		userVerification.GetUpdatedAt(),
+		userVerification.GetSubmitCount(), userVerification.GetCreatedAt().UTC(),
+		userVerification.GetUpdatedAt().UTC(),
 	).StructScan(&uv)
 	if err != nil {
 		tx.Rollback()
@@ -53,15 +53,14 @@ func (r *repo) UpdateUserVerification(userVerification *models.UserVerification)
 		tx  = r.db.MustBegin()
 	)
 	query := `update user_verifications set
-			request_count=$1, submit_count=$2, updated_at=$3,
+						request_count=$1, submit_count=$2, updated_at=$3,
             deeplink=$4, otp=$5
-			where user_id=$6 and destination=$7 and medium=$8`
+						where id=$6 returning id`
 	err = tx.QueryRowx(
 		query, userVerification.GetRequestCount(),
-		userVerification.GetSubmitCount(), userVerification.GetUpdatedAt(),
+		userVerification.GetSubmitCount(), userVerification.GetUpdatedAt().UTC(),
 		userVerification.GetDeeplink(), userVerification.GetOTP(),
-		userVerification.GetId(), userVerification.GetDestination(),
-		userVerification.GetMedium(),
+		userVerification.GetId(),
 	).StructScan(&uv)
 	if err != nil {
 		tx.Rollback()

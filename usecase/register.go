@@ -4,15 +4,21 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"sync"
 
 	"spos/auth/constant"
 	"spos/auth/models"
 
+	"github.com/s-pos/go-utils/logger"
 	"github.com/s-pos/go-utils/utils/response"
 	"golang.org/x/crypto/bcrypt"
 )
 
 func (u *usecase) Register(ctx context.Context, req models.RequestRegister) response.Output {
+	var (
+		wg      sync.WaitGroup
+		errChan = make(chan error, 1)
+	)
 	user, err := u.repository.GetUserByEmail(req.Email)
 	if err == nil {
 		// if email already verified
@@ -30,12 +36,24 @@ func (u *usecase) Register(ctx context.Context, req models.RequestRegister) resp
 			return response.Errors(ctx, http.StatusBadRequest, string(constant.UserEmailAlreadyUsed), constant.Message[constant.RegisterFailed], constant.Reason[constant.UserEmailAlreadyUsed], err)
 		}
 
-		resAuthClient, err := u.authClient.SendEmailVerification(ctx, user)
-		if err != nil {
-			return response.Errors(ctx, http.StatusInternalServerError, string(constant.ErrorUnmarshal), constant.Message[constant.RegisterFailed], constant.ErrorGlobal, err)
-		}
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			resAuthClient, err := u.authClient.SendEmailVerification(ctx, user)
+			if err != nil {
+				errChan <- err
+			}
+			logger.Messagef("%v", resAuthClient).To(ctx)
+		}()
 
-		return response.Success(ctx, http.StatusOK, string(constant.RegisterSuccess), constant.Message[constant.RegisterSuccess], resAuthClient.GetMessage())
+		wg.Wait()
+		select {
+		case err = <-errChan:
+			return response.Errors(ctx, http.StatusInternalServerError, string(constant.UserAlreadyRequestOTP), constant.Message[constant.RegisterFailed], constant.Reason[constant.UserAlreadyRequestOTP], err)
+		default:
+			close(errChan)
+		}
+		return response.Success(ctx, http.StatusOK, string(constant.RegisterSuccess), constant.Message[constant.RegisterSuccess], fmt.Sprintf(constant.RegisterSuccessMessage, user.GetEmail()))
 	}
 
 	// set no telp and will return 628xxxx
@@ -60,9 +78,22 @@ func (u *usecase) Register(ctx context.Context, req models.RequestRegister) resp
 		return response.Errors(ctx, http.StatusBadRequest, string(constant.ErrorQueryInsert), constant.Message[constant.RegisterFailed], constant.ErrorGlobal, err)
 	}
 
-	_, err = u.authClient.SendEmailVerification(ctx, user)
-	if err != nil {
-		return response.Errors(ctx, http.StatusInternalServerError, string(constant.ErrorUnmarshal), constant.Message[constant.RegisterFailed], constant.ErrorGlobal, err)
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		resAuthClient, err := u.authClient.SendEmailVerification(ctx, user)
+		if err != nil {
+			errChan <- err
+		}
+		logger.Messagef("%v", resAuthClient).To(ctx)
+	}()
+
+	wg.Wait()
+	select {
+	case err = <-errChan:
+		return response.Errors(ctx, http.StatusInternalServerError, string(constant.UserAlreadyRequestOTP), constant.Message[constant.RegisterFailed], constant.Reason[constant.UserAlreadyRequestOTP], err)
+	default:
+		close(errChan)
 	}
 
 	return response.Success(ctx, http.StatusCreated, string(constant.RegisterSuccess), constant.Message[constant.RegisterSuccess], fmt.Sprintf(constant.RegisterSuccessMessage, user.GetEmail()))

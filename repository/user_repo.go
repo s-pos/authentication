@@ -51,7 +51,7 @@ func (r *repo) InsertNewUser(user *models.User) (*models.User, error) {
 	err = tx.QueryRowx(
 		query, user.GetName(),
 		user.GetEmail(), user.GetPhone(),
-		user.GetPassword(), now, now,
+		user.GetPassword(), now.UTC(), now.UTC(),
 	).StructScan(user)
 
 	if err != nil {

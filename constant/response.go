@@ -61,6 +61,8 @@ var (
 
 		RegisterSuccess: "register.success",
 		RegisterFailed:  "register.failed",
+
+		UserAlreadyRequestOTP: "request.failed",
 	}
 
 	Reason = map[Code]string{
