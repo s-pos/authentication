@@ -29,6 +29,8 @@ func (r *route) Router() *echo.Echo {
 	// base path
 	auth := router.Group("", echo.WrapMiddleware(r.middleware.Logger), echo.WrapMiddleware(r.middleware.APIKey))
 	auth.POST("/login", r.controller.LoginHandler)
+	auth.POST("/register", r.controller.RegisterHandler)
+	auth.POST("/verification", r.controller.VerificationRegisterHandler)
 
 	return router
 }

@@ -2,8 +2,11 @@ package repository
 
 import (
 	"context"
+	"crypto/rand"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"math/big"
 	"os"
 	"strings"
 	"time"
@@ -38,8 +41,36 @@ func (r *repo) SetAccessToken(ctx context.Context, user *models.User) (string, i
 	return key, int64(exp.Seconds()), result.Err()
 }
 
+func (r *repo) SetToken(ctx context.Context, data interface{}, isResetPassword bool) (string, error) {
+	var (
+		key           = uuid.New().String()
+		otpExpired, _ = time.ParseDuration(os.Getenv("OTP_EXPIRED"))
+		err           error
+	)
+	key = strings.ReplaceAll(key, "-", "")
+
+	if !isResetPassword {
+		max := big.NewInt(999999)
+		n, err := rand.Int(rand.Reader, max)
+		if err != nil {
+			return "", err
+		}
+
+		key = fmt.Sprintf("%06d", n.Int64())
+	}
+
+	err = r.redis.Set(ctx, key, data, otpExpired).Err()
+
+	return key, err
+}
+
 func (r *repo) GetRedisData(ctx context.Context, key string) (string, error) {
 	result := r.redis.Get(ctx, key)
 
 	return result.Val(), result.Err()
+}
+
+func (r *repo) DeleteRedisData(ctx context.Context, key string) error {
+	err := r.redis.Del(ctx, key).Err()
+	return err
 }
