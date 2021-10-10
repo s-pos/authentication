@@ -2,7 +2,9 @@ package rpc
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
+	"net/http"
 	"os"
 	"time"
 
@@ -15,6 +17,7 @@ import (
 
 type authClient struct {
 	client     auth.UserAuthServiceClient
+	httpClient *http.Client
 	timezone   *time.Location
 	repository repository.Repository
 }
@@ -37,11 +40,20 @@ func NewAuthClient(repo repository.Repository, timezone *time.Location) AuthClie
 		opts          []grpc.DialOption
 	)
 
+	httpClient := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		},
+	}
+
 	conn, err := grpc.Dial(emailGrpcPort, opts...)
 	if err != nil {
 		return &authClient{
 			repository: repo,
 			timezone:   timezone,
+			httpClient: httpClient,
 		}
 	}
 
@@ -51,5 +63,6 @@ func NewAuthClient(repo repository.Repository, timezone *time.Location) AuthClie
 		client:     client,
 		repository: repo,
 		timezone:   timezone,
+		httpClient: httpClient,
 	}
 }

@@ -20,7 +20,7 @@ func (ac *authClient) SendEmailVerification(ctx context.Context, user *models.Us
 		return nil, err
 	}
 
-	err = ac.saveUserVerification(user, constant.MediumEmail, constant.TypeRegister, otp)
+	err = ac.saveUserVerification(ctx, user, constant.MediumEmail, constant.TypeRegister, otp)
 	if err != nil {
 		logger.Messagef("error save verification %v", err).To(ctx)
 		return nil, err
@@ -37,7 +37,7 @@ func (ac *authClient) SendEmailVerification(ctx context.Context, user *models.Us
 	return nil, err
 }
 
-func (ac *authClient) saveUserVerification(user *models.User, medium, types, otp string) error {
+func (ac *authClient) saveUserVerification(ctx context.Context, user *models.User, medium, types, otp string) error {
 	// check data first, if no one, then insert
 	var (
 		now  = time.Now().In(ac.timezone)
@@ -58,8 +58,15 @@ func (ac *authClient) saveUserVerification(user *models.User, medium, types, otp
 	uv, err := ac.repository.GetUserVerificationByDestination(medium, dest)
 	if err == nil {
 		if uv.IsReadyToSend() {
+			// create short link a.k.a dynamic_link
+			shortLink, err := ac.dynamicLink(ctx, user, otp)
+			if err != nil {
+				return err
+			}
+
 			uv.SetUpdatedAt(now)
 			uv.SetOTP(otp)
+			uv.SetDeeplink(shortLink)
 			uv.SetRequestCount(uv.GetRequestCount() + 1)
 
 			_, err = ac.repository.UpdateUserVerification(uv)
@@ -78,8 +85,15 @@ func (ac *authClient) saveUserVerification(user *models.User, medium, types, otp
 		return err
 	}
 
+	// create short link a.k.a dynamic_link
+	shortLink, err := ac.dynamicLink(ctx, user, otp)
+	if err != nil {
+		return err
+	}
+
 	uv.SetUserId(user.GetId())
 	uv.SetOTP(otp)
+	uv.SetDeeplink(shortLink)
 	uv.SetDestination(dest)
 	uv.SetRequestCount(1)
 	uv.SetType(types)
@@ -92,4 +106,14 @@ func (ac *authClient) saveUserVerification(user *models.User, medium, types, otp
 	}
 
 	return nil
+}
+
+func (ac *authClient) dynamicLink(ctx context.Context, user *models.User, otp string) (string, error) {
+	data := &DynamicLinkData{
+		Email: user.GetEmail(),
+		Token: otp,
+	}
+
+	shortLink, err := ac.CreateDynamicLink(ctx, data, Verification)
+	return shortLink, err
 }
