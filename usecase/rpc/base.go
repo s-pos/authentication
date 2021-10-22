@@ -36,7 +36,7 @@ type AuthClient interface {
 
 func NewAuthClient(repo repository.Repository, timezone *time.Location) AuthClient {
 	var (
-		emailGrpcPort = fmt.Sprintf(":%s", os.Getenv("SERVICE_EMAIL_GRPC_PORT"))
+		emailGrpcPort = os.Getenv("QUEUE_GRPC_HOST")
 		opts          []grpc.DialOption
 	)
 
@@ -48,13 +48,11 @@ func NewAuthClient(repo repository.Repository, timezone *time.Location) AuthClie
 		},
 	}
 
+	opts = append(opts, grpc.WithInsecure())
 	conn, err := grpc.Dial(emailGrpcPort, opts...)
 	if err != nil {
-		return &authClient{
-			repository: repo,
-			timezone:   timezone,
-			httpClient: httpClient,
-		}
+		err = fmt.Errorf("error connect to grpc client %s and got error %v", emailGrpcPort, err)
+		panic(err)
 	}
 
 	client := auth.NewUserAuthServiceClient(conn)

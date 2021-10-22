@@ -20,24 +20,25 @@ func (ac *authClient) SendEmailVerification(ctx context.Context, user *models.Us
 		return nil, err
 	}
 
-	err = ac.saveUserVerification(ctx, user, constant.MediumEmail, constant.TypeRegister, otp)
+	shortLink, err := ac.saveUserVerification(ctx, user, constant.MediumEmail, constant.TypeRegister, otp)
 	if err != nil {
 		logger.Messagef("error save verification %v", err).To(ctx)
 		return nil, err
 	}
 
-	// req := &auth.Verification{
-	// 	Name:  user.GetName(),
-	// 	Email: user.GetEmail(),
-	// 	Otp:   otp,
-	// }
+	req := &auth.Verification{
+		Name:  user.GetName(),
+		Email: user.GetEmail(),
+		Otp:   otp,
+		Link:  shortLink,
+	}
 
-	// res, err := ac.client.SendEmailVerification(ctx, req)
+	res, err := ac.client.SendEmailVerification(ctx, req)
 
-	return nil, err
+	return res, err
 }
 
-func (ac *authClient) saveUserVerification(ctx context.Context, user *models.User, medium, types, otp string) error {
+func (ac *authClient) saveUserVerification(ctx context.Context, user *models.User, medium, types, otp string) (string, error) {
 	// check data first, if no one, then insert
 	var (
 		now  = time.Now().In(ac.timezone)
@@ -52,7 +53,7 @@ func (ac *authClient) saveUserVerification(ctx context.Context, user *models.Use
 		dest = user.GetPhone()
 	default:
 		err = fmt.Errorf("medium not found")
-		return err
+		return "", err
 	}
 
 	uv, err := ac.repository.GetUserVerificationByDestination(medium, dest)
@@ -61,7 +62,7 @@ func (ac *authClient) saveUserVerification(ctx context.Context, user *models.Use
 			// create short link a.k.a dynamic_link
 			shortLink, err := ac.dynamicLink(ctx, user, otp)
 			if err != nil {
-				return err
+				return "", err
 			}
 
 			uv.SetUpdatedAt(now)
@@ -71,24 +72,24 @@ func (ac *authClient) saveUserVerification(ctx context.Context, user *models.Use
 
 			_, err = ac.repository.UpdateUserVerification(uv)
 			if err != nil {
-				return err
+				return "", err
 			}
 
-			return nil
+			return shortLink, nil
 		}
 
 		err = fmt.Errorf("you just send request verification. please wait 2mins")
-		return err
+		return "", err
 	}
 
 	if !errors.Is(err, sql.ErrNoRows) {
-		return err
+		return "", err
 	}
 
 	// create short link a.k.a dynamic_link
 	shortLink, err := ac.dynamicLink(ctx, user, otp)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	uv.SetUserId(user.GetId())
@@ -102,10 +103,10 @@ func (ac *authClient) saveUserVerification(ctx context.Context, user *models.Use
 
 	_, err = ac.repository.NewUserVerification(uv)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	return shortLink, nil
 }
 
 func (ac *authClient) dynamicLink(ctx context.Context, user *models.User, otp string) (string, error) {
