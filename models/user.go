@@ -173,3 +173,12 @@ func (u *User) GetUserVerifications() []*UserVerification {
 
 	return uv
 }
+
+func (u *User) GetUserVerificationByMediumAndDestination(medium, dest string) *UserVerification {
+	for _, userVerification := range u.GetUserVerifications() {
+		if userVerification.GetMedium() == medium && userVerification.GetDestination() == dest {
+			return userVerification
+		}
+	}
+	return &UserVerification{}
+}

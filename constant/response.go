@@ -65,6 +65,8 @@ const (
 	ErrorMarshal Code = "109990"
 	// ErrorUnmarshal error when unmarshal struct
 	ErrorUnmarshal Code = "109991"
+	// ErrorParseDate error when parsing date
+	ErrorParseDate Code = "109992"
 )
 
 var (
@@ -79,6 +81,8 @@ var (
 		VerificationFailed:  "verification.failed",
 
 		UserAlreadyRequestOTP: "request.failed",
+
+		ErrorParseDate: "system.error.parse_date",
 	}
 
 	Reason = map[Code]string{
