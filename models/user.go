@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 )
@@ -18,6 +19,9 @@ type User struct {
 
 	FcmToken *string `db:"-"`
 	DeviceId *string `db:"-"`
+
+	// relation table will be here
+	UserVerifications []byte `db:"user_verifications"`
 }
 
 func (u *User) GetDeviceId() *string {
@@ -123,4 +127,58 @@ func (u *User) GetUpdatedAt() time.Time {
 
 func (u *User) SetUpdatedAt(updatedAt time.Time) {
 	u.UpdatedAt = updatedAt
+}
+
+func (u *User) AddUserVerification(userVerification *UserVerification) {
+	var uv = u.GetUserVerifications()
+	uv = append(uv, userVerification)
+
+	dataByte, err := json.Marshal(uv)
+	if err != nil {
+		return
+	}
+
+	u.UserVerifications = dataByte
+}
+
+func (u *User) RemoveUserVerification(userVerification *UserVerification) {
+	var uv = u.GetUserVerifications()
+
+	for key, val := range uv {
+		if val == userVerification {
+			uv = append(uv[:key], uv[key+1:]...)
+			break
+		}
+	}
+
+	dataByte, err := json.Marshal(uv)
+	if err != nil {
+		return
+	}
+
+	u.UserVerifications = dataByte
+}
+
+func (u *User) GetUserVerifications() []*UserVerification {
+	var uv = make([]*UserVerification, 0)
+
+	if u.UserVerifications == nil {
+		return uv
+	}
+
+	err := json.Unmarshal(u.UserVerifications, &uv)
+	if err != nil {
+		return uv
+	}
+
+	return uv
+}
+
+func (u *User) GetUserVerificationByMediumAndDestination(medium, dest string) *UserVerification {
+	for _, userVerification := range u.GetUserVerifications() {
+		if userVerification.GetMedium() == medium && userVerification.GetDestination() == dest {
+			return userVerification
+		}
+	}
+	return &UserVerification{}
 }

@@ -6,18 +6,18 @@ import (
 )
 
 type UserVerification struct {
-	ID           int        `db:"id"`
-	UserID       int        `db:"user_id"`
-	Type         string     `db:"type"`        // it will be 'register' and 'forgot_password' or 'phone_verification'
-	Medium       string     `db:"medium"`      // it will be 'email' or 'phone'
-	Destination  string     `db:"destination"` // it will be phone_number or email user
-	RequestCount int        `db:"request_count"`
-	SubmitCount  *int       `db:"submit_count"`
-	Deeplink     *string    `db:"deeplink"`
-	OTP          *string    `db:"otp"`
-	CreatedAt    time.Time  `db:"created_at"`
-	UpdatedAt    *time.Time `db:"updated_at"`
-	SubmitedAt   *time.Time `db:"submited_at"`
+	ID           int     `db:"id" json:"id"`
+	UserID       int     `db:"user_id" json:"user_id"`
+	Type         string  `db:"type" json:"type"`               // it will be 'register' and 'forgot_password' or 'phone_verification'
+	Medium       string  `db:"medium" json:"medium"`           // it will be 'email' or 'phone'
+	Destination  string  `db:"destination" json:"destination"` // it will be phone_number or email user
+	RequestCount int     `db:"request_count" json:"request_count"`
+	SubmitCount  *int    `db:"submit_count" json:"submit_count"`
+	Deeplink     *string `db:"deeplink" json:"deeplink"`
+	OTP          *string `db:"otp" json:"otp"`
+	CreatedAt    string  `db:"created_at" json:"created_at"`
+	UpdatedAt    *string `db:"updated_at" json:"updated_at"`
+	SubmitedAt   *string `db:"submited_at" json:"submited_at"`
 }
 
 func (uv *UserVerification) GetId() int {
@@ -100,37 +100,41 @@ func (uv *UserVerification) GetSubmitCount() int {
 }
 
 func (uv *UserVerification) SetCreatedAt(createdAt time.Time) {
-	uv.CreatedAt = createdAt
+	created := timeToString(createdAt)
+	uv.CreatedAt = created
 }
 
 func (uv *UserVerification) GetCreatedAt() time.Time {
-	return convertTimezone(uv.CreatedAt)
+	created, _ := stringToTime(uv.CreatedAt)
+	return created
 }
 
 func (uv *UserVerification) SetUpdatedAt(updatedAt time.Time) {
-	uv.UpdatedAt = &updatedAt
+	updated := timeToString(updatedAt)
+	uv.UpdatedAt = &updated
 }
 
-func (uv *UserVerification) GetUpdatedAt() *time.Time {
+func (uv *UserVerification) GetUpdatedAt() time.Time {
 	if uv.UpdatedAt == nil {
-		return nil
+		return time.Time{}
 	}
 
-	updatedAt := convertTimezone(*uv.UpdatedAt)
-	return &updatedAt
+	updatedAt, _ := stringToTime(*uv.UpdatedAt)
+	return updatedAt
 }
 
 func (uv *UserVerification) SetSubmitedAt(submitedAt time.Time) {
-	uv.SubmitedAt = &submitedAt
+	submited := timeToString(submitedAt)
+	uv.SubmitedAt = &submited
 }
 
-func (uv *UserVerification) GetSubmitedAt() *time.Time {
+func (uv *UserVerification) GetSubmitedAt() time.Time {
 	if uv.SubmitedAt == nil {
-		return &time.Time{}
+		return time.Time{}
 	}
 
-	submitedAt := convertTimezone(*uv.SubmitedAt)
-	return &submitedAt
+	submitedAt, _ := stringToTime(*uv.SubmitedAt)
+	return submitedAt
 }
 
 func (uv *UserVerification) IsReadyToSend() bool {
@@ -142,8 +146,8 @@ func (uv *UserVerification) IsReadyToSend() bool {
 
 	otpTime = uv.GetCreatedAt()
 	if uv.RequestCount > 1 {
-		if uv.GetUpdatedAt() != nil {
-			otpTime = *uv.GetUpdatedAt()
+		if !uv.GetUpdatedAt().IsZero() {
+			otpTime = uv.GetUpdatedAt()
 		} else {
 			otpTime = uv.GetCreatedAt()
 		}

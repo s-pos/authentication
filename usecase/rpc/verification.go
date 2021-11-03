@@ -2,8 +2,6 @@ package rpc
 
 import (
 	"context"
-	"database/sql"
-	"errors"
 	"fmt"
 	"time"
 
@@ -56,8 +54,8 @@ func (ac *authClient) saveUserVerification(ctx context.Context, user *models.Use
 		return "", err
 	}
 
-	uv, err := ac.repository.GetUserVerificationByDestination(medium, dest)
-	if err == nil {
+	uv := user.GetUserVerificationByMediumAndDestination(medium, dest)
+	if *uv != (models.UserVerification{}) {
 		if uv.IsReadyToSend() {
 			// create short link a.k.a dynamic_link
 			shortLink, err := ac.dynamicLink(ctx, user, otp)
@@ -78,11 +76,7 @@ func (ac *authClient) saveUserVerification(ctx context.Context, user *models.Use
 			return shortLink, nil
 		}
 
-		err = fmt.Errorf("you just send request verification. please wait 2mins")
-		return "", err
-	}
-
-	if !errors.Is(err, sql.ErrNoRows) {
+		err = fmt.Errorf(string(constant.UserAlreadyRequestOTP))
 		return "", err
 	}
 

@@ -13,9 +13,10 @@ func (r *repo) GetUserByEmail(email string) (*models.User, error) {
 	)
 
 	query := `select
-       		id, "name", email, phone_number, password, 
-					email_verification_at, phone_verification_at
-			from users
+      id, "name", email, phone_number, password, 
+			email_verification_at, phone_verification_at,
+			user_verifications
+			from users_view
 			where email=$1`
 
 	err = r.db.Get(&user, query, email)
@@ -29,9 +30,10 @@ func (r *repo) GetUserByPhone(phone string) (*models.User, error) {
 	)
 
 	query := `select
-       		id, "name", email, phone_number, password,
-       		email_verification_at, phone_verification_at
-			from users
+      id, "name", email, phone_number, password,
+      email_verification_at, phone_verification_at,
+			user_verifications
+			from users_view
 			where phone_number=$1`
 
 	err = r.db.Get(&user, query, phone)
