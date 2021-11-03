@@ -51,7 +51,12 @@ func (u *usecase) Register(ctx context.Context, req models.RequestRegister) resp
 		wg.Wait()
 		select {
 		case err = <-errChan:
-			return response.Errors(ctx, http.StatusTooEarly, string(constant.UserAlreadyRequestOTP), constant.Message[constant.RegisterFailed], constant.Reason[constant.UserAlreadyRequestOTP], err)
+			switch err.Error() {
+			case string(constant.UserAlreadyRequestOTP):
+				return response.Errors(ctx, http.StatusTooEarly, string(constant.UserAlreadyRequestOTP), constant.Message[constant.RegisterFailed], constant.Reason[constant.UserAlreadyRequestOTP], err)
+			default:
+				return response.Errors(ctx, http.StatusInternalServerError, string(constant.RegisterFailed), constant.Message[constant.RegisterFailed], constant.ErrorGlobal, err)
+			}
 		default:
 			close(errChan)
 		}
@@ -97,7 +102,12 @@ func (u *usecase) Register(ctx context.Context, req models.RequestRegister) resp
 	wg.Wait()
 	select {
 	case err = <-errChan:
-		return response.Errors(ctx, http.StatusInternalServerError, string(constant.UserAlreadyRequestOTP), constant.Message[constant.RegisterFailed], constant.Reason[constant.UserAlreadyRequestOTP], err)
+		switch err.Error() {
+		case string(constant.UserAlreadyRequestOTP):
+			return response.Errors(ctx, http.StatusTooEarly, string(constant.UserAlreadyRequestOTP), constant.Message[constant.RegisterFailed], constant.Reason[constant.UserAlreadyRequestOTP], err)
+		default:
+			return response.Errors(ctx, http.StatusInternalServerError, string(constant.RegisterFailed), constant.Message[constant.RegisterFailed], constant.ErrorGlobal, err)
+		}
 	default:
 		close(errChan)
 	}

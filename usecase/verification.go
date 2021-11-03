@@ -28,8 +28,9 @@ func (u *usecase) VerificationRegister(ctx context.Context, req models.RequestVe
 	go func() {
 		defer wg.Done()
 
-		uv, err := u.repository.GetUserVerificationByDestination(constant.MediumEmail, user.GetEmail())
-		if err != nil {
+		uv := user.GetUserVerificationByMediumAndDestination(constant.MediumEmail, user.GetEmail())
+		if uv == nil {
+			err = fmt.Errorf("error userverification null")
 			errChan <- err
 			return
 		}
